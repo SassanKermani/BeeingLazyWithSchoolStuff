@@ -1,0 +1,1 @@
+AYYYYYYY. this is my code bro. its kind of really bad but it's a solid good enough.
