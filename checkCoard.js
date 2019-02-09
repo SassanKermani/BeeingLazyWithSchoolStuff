@@ -1,6 +1,3 @@
-
-let fs = require(`fs`);
-
 let file = require(`./old.json`);
 
 // console.log(file.result);
@@ -10,7 +7,8 @@ const puppeteer = require('puppeteer');
 (async () => {
 	const browser = await puppeteer.launch({headless: true});
 	const page = await browser.newPage();
-	
+	await page.setViewport({ width: 1366, height: 768});
+
 	await page.goto('https://frcc.desire2learn.com/d2l/le/content/2271056/viewContent/24384506/View');
 
 	await page.waitForNavigation();
@@ -35,62 +33,46 @@ const puppeteer = require('puppeteer');
 
 		let arr = [];
 		let arrI = 0;
+		arrAllGood = 3;
 
 		let myNodeList = document.querySelectorAll('div.d2l-thread-reply-counts');
 
 		Array.from(myNodeList).forEach(function(el) {
 			// console.log(el.children);
 			for(let i = 0; i < el.children.length; i++){
-				// console.log(el.children[i].children[0].textContent);
-				arr[arrI] = el.children[i].children[0].textContent;
-				arrI++;
+				
+				if(arrAllGood == 3){
+					// console.log(el.children[i].children[0].textContent);
+					arr[arrI] = el.children[i].children[0].textContent;
+					arrI++;
+					arrAllGood = 1;
+				}else{
+					arrAllGood++;
+				}
+
 			}
 		});
-
+		
 		return arr;
-
+		
 	});
 
-	// console.log(result);s
+	console.log(result);
 
+	let bolI = 0;
 	let bol = true;
 
-	if(file.result.length != result.length ){
-		bol = false;
-		// console.log(`ya you need to cheack the thing`);
-	}else{
-
-		// let bol = true;
-
-		let bolI =0;
-
-		while(bol == true && bolI < file.result.length){
-
-			// console.log(bolI);
-
-			if(file.result[bolI] == result[bolI] ){
-				bolI++;
-			}else{
-				bol = false;
-
-				fs.writeFile('old.json', JSON.stringify({
-
-					result : result
-
-				}), (err) => {
-					if (err) throw err;
-				});
-			}
-
+	while(bolI < result.length && bol == true){
+		if(result[bolI] != 0){
+			bol = false;
 		}
-
+		bolI++;
 	}
 
 	if(bol){
 		console.log(`you all good bro`);
 	}else{
 		console.log(`nah you got work to do`);
-
 	}
 
 	await browser.close();
