@@ -1,6 +1,3 @@
-let file = require(`./old.json`);
-
-// console.log(file.result);
 
 const puppeteer = require('puppeteer');
 
@@ -18,6 +15,8 @@ const puppeteer = require('puppeteer');
 	await page.type("#password", ``);
 
 	await page.click(".btn-submit");
+
+	// await page.waitForNavigation({ waitUntil: 'networkidle2' })
 
 	try {
 		await page.waitForSelector('.d2l-page-main-padding');
@@ -69,10 +68,27 @@ const puppeteer = require('puppeteer');
 		bolI++;
 	}
 
+	// bol = false;
+
 	if(bol){
 		console.log(`you all good bro`);
 	}else{
 		console.log(`nah you got work to do`);
+
+		const browserTwo = await puppeteer.launch({headless: false});
+		const pagetwo = await browserTwo.newPage();
+		await pagetwo.setViewport({ width: 1366, height: 768});
+
+		await pagetwo.goto('https://frcc.desire2learn.com/d2l/le/content/2271056/viewContent/24384506/View');
+
+		await pagetwo.waitForNavigation();
+
+		await pagetwo.type("#username", "S02108336");
+
+		await pagetwo.type("#password", `sy("USn8jgtd!<Mc`);
+
+		await pagetwo.click(".btn-submit");
+
 	}
 
 	await browser.close();
