@@ -1,0 +1,120 @@
+const puppeteer = require('puppeteer');
+
+
+(async () => {
+
+	const browser = await puppeteer.launch({headless: true});
+	const page = await browser.newPage();
+	await page.setViewport({ width: 1366, height: 768});
+
+	await page.goto('https://www.youtube.com/user/EthosLab/videos');
+
+	try {
+		await page.waitForSelector('#header');
+	} catch (e) {
+		if (e instanceof TimeoutError) {
+			console.log(`oh shit… thats like bad, you should try rerunning this program if your a user, also copy this mesage and yell at the guy to fix this`);
+		}
+	}
+
+	let vidObjArr = await page.evaluate(()=>{
+		
+		let tempVidObjArr = [];
+
+		for(let i = 0; i <  Array.from(Array.from(document.querySelectorAll(`.style-scope.ytd-grid-renderer`))[1].children).length; i++ ){
+
+			console.log(i);
+
+			tempVidObjArr[i] = {};
+
+			tempVidObjArr[i].name = Array.from(document.querySelectorAll(`.style-scope.ytd-grid-renderer`))[1].children[i].children[0].children[1].children[0].children[0].children[1].textContent;
+
+			tempVidObjArr[i].url = Array.from(document.querySelectorAll(`.style-scope.ytd-grid-renderer`))[1].children[i].children[0].children[1].children[0].children[0].children[1].href;
+
+			// tempVidObjArr[i].date = Array.from(document.querySelectorAll(`.style-scope.ytd-grid-renderer`))[1].children[i].children[0].children[1].children[0].children[1].children[0].children[1].children[1].textContent;
+
+		}
+
+		console.log(tempVidObjArr)
+
+		return tempVidObjArr;
+ 		
+	})
+
+	console.log(vidObjArr);
+
+	vidObjArr = await setDate(page, vidObjArr);
+
+	console.log(`vidObjArr`);
+	console.log(vidObjArr);
+
+	await browser.close();
+
+})();
+
+let setDate = async (page, vidObjArrIn)=>{
+
+	// page.goto(`https://www.test.com`);
+
+	let i = 0;
+
+	let aculyDothing = async (page)=>{
+
+		// console.log(i);
+
+		if( i < vidObjArrIn.length ){
+
+			await page.goto(`${vidObjArrIn[i].url}`, {waitUntil : `networkidle0`});
+
+			try{
+				vidObjArrIn[i].date = await page.evaluate(()=>{
+					let tempVar = document.querySelector(`span.date.style-scope.ytd-video-secondary-info-renderer`).textContent;
+					return tempVar;
+				});
+			}catch{
+				vidObjArrIn[i].date = `NA`;
+			}
+
+			i++
+
+			await aculyDothing(page);
+		}
+	}
+
+	await aculyDothing(page);
+
+	return vidObjArrIn;
+
+}
+
+// /*=========================================
+// =            UseFull functions            =
+// =========================================*/
+
+// // GETS ALL VIDOS IN AN ARRAY
+// Array.from(Array.from(document.querySelectorAll(`.style-scope.ytd-grid-renderer`))[1].children).forEach((a)=>{ console.log(a) });
+
+// //GETS DATE RELESED
+// Array.from(Array.from(document.querySelectorAll(`.style-scope.ytd-grid-renderer`))[1].children).forEach((a)=>{ console.log(a.children[0].children[1].children[0].children[1].children[0].children[1].children[1].textContent) });
+
+// //GET TITLE
+// Array.from(Array.from(document.querySelectorAll(`.style-scope.ytd-grid-renderer`))[1].children).forEach((a)=>{ console.log(a.children[0].children[1].children[0].children[0].children[1].textContent) });
+
+// //URL FOR EACH VID
+// Array.from(Array.from(document.querySelectorAll(`.style-scope.ytd-grid-renderer`))[1].children).forEach((a)=>{ console.log(a.children[0].children[1].children[0].children[0].children[1].href) });
+
+// /*NOTES//
+
+// the unequ ID IS THE URL!!
+// keep all youtube stuff in posgress DB and keep userdata in FS/MONGO
+
+// vieoObject{
+// 	url : <>,
+// 	title : <>,
+// 	date : <>
+// }
+
+// //NOTES*/
+
+// /*=====  End of UseFull functions  ======*/
+
